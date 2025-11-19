@@ -20,7 +20,7 @@ from __future__ import annotations
 from typing import Dict, Any, List
 
 from racag.query.query_engine import QueryEngine
-from racag.rerank.rerank_engine import ReRanker
+from racag.reranker.rerank_engine import ReRanker
 from racag.context.context_assembler import assemble_context
 
 

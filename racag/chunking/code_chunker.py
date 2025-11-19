@@ -1,13 +1,21 @@
 from tree_sitter import Language, Parser
 from pathlib import Path
 from typing import List, Dict
+import ctypes
 
-# Load precompiled Swift language library
+# Load precompiled Swift language library (tree-sitter 0.25+ API)
 SWIFT_LANGUAGE_LIB = "racag/tree_sitter_languages/build/my-languages.so"
-SWIFT = Language(SWIFT_LANGUAGE_LIB, "swift")
+
+# Load the shared library
+lib = ctypes.CDLL(SWIFT_LANGUAGE_LIB)
+tree_sitter_swift = lib.tree_sitter_swift
+tree_sitter_swift.restype = ctypes.c_void_p
+
+# Create Language from pointer (tree-sitter 0.25+ API)
+SWIFT = Language(tree_sitter_swift())
 
 parser = Parser()
-parser.set_language(SWIFT)
+parser.language = SWIFT
 
 def extract_code_chunks(file_path: str) -> List[Dict]:
     """

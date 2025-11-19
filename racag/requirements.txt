@@ -1,13 +1,28 @@
 # RACAG Dependencies
-# Core dependencies for retrieval-augmented code analysis
+# Complete dependencies for retrieval-augmented code analysis
 
+# Core Vector DB & Embeddings
 chromadb>=0.4.0
 openai>=1.0.0
+tiktoken>=0.5.0
+
+# Web Framework
 fastapi>=0.104.0
 uvicorn[standard]>=0.24.0
 pydantic>=2.0.0
+
+# Configuration Management
 python-dotenv>=1.0.0
 PyYAML>=6.0
 
-# Optional but recommended
-tiktoken>=0.5.0
+# Code Parsing (tree-sitter)
+tree-sitter>=0.20.0
+
+# File System Watching
+watchdog>=3.0.0
+
+# Visualization (diagnostics)
+matplotlib>=3.7.0
+
+# Telemetry & Tracing
+opentelemetry-api>=1.20.0
