@@ -4,7 +4,7 @@
 //
 //  Centralized profile button toolbar injection
 //  Applied at app level to all main screens
-//  See /docs/00-CANONICAL/ios-amiqo.md §Design System - Profile Architecture
+//  See /docs/00-architecture-overview.md for design system
 //
 
 import SwiftUI

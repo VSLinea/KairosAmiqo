@@ -6,9 +6,9 @@ This file creates an HTTP API around the RACAG engine.
 It is safe for production and usable by:
 
 - Kairos Amiqo iOS app
-- Android app
+- Android app (future)
 - GCP Cloud Run
-- Any backend (Node/Directus/Next.js)
+- Fastify backend
 - Local dev
 
 Endpoint:
@@ -59,7 +59,7 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# CORS – allow mobile apps, web apps, CLI, Node-RED etc.
+# CORS – allow mobile apps, web apps, CLI, etc.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],            # For production: restrict to your domains

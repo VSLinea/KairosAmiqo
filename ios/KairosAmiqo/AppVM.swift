@@ -2143,7 +2143,7 @@ final class AppVM: NSObject, ObservableObject {
     // MARK: - AI Proposals (Task 28)
     
     /// Generate AI proposal for a plan (Plus tier only)
-    /// See: /docs/00-CANONICAL/BOARD_DECISION_2025-10-26.md §2 (LLM provider)
+    /// See: Architecture documentation for LLM provider details
     /// Cost: ~$0.002 per request with GPT-3.5-turbo
     /// - Parameter plan: Draft plan to generate suggestions for
     @MainActor

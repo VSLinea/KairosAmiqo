@@ -16,7 +16,7 @@ import MapKit
 import CoreLocation
 
 /// Learned Locations management view
-/// See: /docs/00-CANONICAL/core-data-model.md (future schema)
+/// See: /docs/01-data-model.md for data structure
 /// See: /docs/UX-SPECIFICATION-PLANS-EVENTS-AMIQO.md §Places
 struct LearnedLocationsView: View {
     @ObservedObject var vm: AppVM

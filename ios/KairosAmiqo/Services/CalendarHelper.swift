@@ -19,7 +19,7 @@ import UIKit
 /// - DST-safe duration calculations using Calendar API
 /// - Locale-aware date formatting
 ///
-/// See: /docs/00-CANONICAL/ios-amiqo.md §Calendar Integration
+/// See: /docs/00-architecture-overview.md for calendar integration
 class CalendarHelper {
     private let eventStore = EKEventStore()
     private let calendar = Calendar.current // Respects user's calendar preference

@@ -15,7 +15,7 @@ enum PlacesDestination: Hashable {
 }
 
 /// Places tab - Learned locations, favorites, and POI exploration
-/// See: /docs/00-CANONICAL/core-data-model.md §poi, §poi_ratings
+/// See: /docs/01-data-model.md for data structure
 struct PlacesView: View {
     @ObservedObject var vm: AppVM
     var onScrollOffsetChange: ((CGFloat) -> Void)? = nil // Tab bar auto-hide callback

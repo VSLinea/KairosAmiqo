@@ -9,7 +9,7 @@ import Foundation
 /// 
 /// **Memory Management:** Cache only unsynced items, not server-fetched data
 /// 
-/// See: /docs/00-CANONICAL/backend-apis.md §Negotiations (Plans) → Data Persistence & Sync Strategy
+/// See: /docs/02-api-contracts.md for API specifications
 class CacheManager {
     private let userDefaults = UserDefaults.standard
     private let cacheKey = "kairos_pending_sync"

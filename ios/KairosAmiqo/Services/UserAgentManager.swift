@@ -39,8 +39,8 @@ final class UserAgentManager {
     /// User's agent preferences (learned patterns, autonomy settings, veto rules)
     private var preferences: AgentPreferences
     
-    /// Directus client for sending/receiving messages
-    private let directusClient: HTTPClient
+    /// Backend client for sending/receiving messages
+    private let backendClient: HTTPClient
     
     /// Preference learning service for scoring algorithms
     private let learningService: PreferenceLearningService
@@ -54,20 +54,20 @@ final class UserAgentManager {
     /// - Parameters:
     ///   - userId: Current user UUID
     ///   - preferences: User's agent preferences
-    ///   - directusClient: HTTP client for Directus API
+    ///   - backendClient: HTTP client for backend API
     ///   - openAIKey: OpenAI API key (optional - falls back to heuristics)
     init(
         userId: UUID,
         preferences: AgentPreferences,
-        directusClient: HTTPClient,
+        backendClient: HTTPClient,
         openAIKey: String? = nil
     ) {
         self.userId = userId
         self.preferences = preferences
-        self.directusClient = directusClient
+        self.backendClient = backendClient
         self.learningService = PreferenceLearningService(
             userId: userId,
-            directusClient: directusClient
+            backendClient: backendClient
         )
         
         // Initialize AI service if key provided (main actor isolated)

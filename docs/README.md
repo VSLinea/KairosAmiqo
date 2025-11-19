@@ -26,28 +26,13 @@ The `/docs` directory serves as the **single source of truth** for:
 ```
 docs/
 ├── README.md                              # This file
-│
-├── 00-CANONICAL/                          # Single source of truth (Phase 2)
-│   ├── architecture-overview.md           # System-level design
-│   ├── core-data-model.md                 # Database schema (PostgreSQL)
-│   ├── backend-apis.md                    # REST API contracts (Fastify)
-│   ├── authentication-flow.md             # Firebase Auth + JWT verification
-│   ├── negotiation-state-machine.md       # Negotiation lifecycle logic
-│   └── e2ee-specification.md              # End-to-end encryption design
-│
-├── 01-REFERENCE/                          # Supporting documentation
-│   ├── ios-development-guide.md           # SwiftUI conventions
-│   ├── backend-development-guide.md       # Fastify + TypeScript patterns
-│   ├── deployment-guide.md                # Cloud Run + Cloud SQL setup
-│   └── security-best-practices.md         # Security checklist
-│
-├── 02-IMPLEMENTATION/                     # Phase-specific notes
-│   ├── phase3-backend-tasks.md            # Backend implementation checklist
-│   ├── phase4-ios-refactor-tasks.md       # iOS API integration tasks
-│   └── phase5-integration-tests.md        # E2E test scenarios
-│
-└── 03-ARCHIVE/                            # Historical decisions (non-canonical)
-    └── architecture-decisions/            # ADRs (if applicable)
+├── 00-architecture-overview.md            # System-level design
+├── 01-data-model.md                       # Database schema (PostgreSQL)
+├── 02-api-contracts.md                    # REST API contracts (Fastify)
+├── 02-terminology.md                      # Canonical terminology
+├── 03-backend-structure.md                # Backend project structure
+├── 04-database-schema.md                  # Complete database schema
+└── 05-api-reference.md                    # Full API reference
 ```
 
 ---
@@ -91,16 +76,16 @@ docs/
 - Phase 5: Final validation against production behavior
 
 **Maintenance:**
-- Keep `/docs/00-CANONICAL/` synchronized with production code
-- Archive superseded docs in `/docs/03-ARCHIVE/`
+- Keep `/docs/` synchronized with production code
 - Use Git history for version tracking (no `_v1.md`, `_v2.md` suffixes)
+- All documents in flat structure for easy access
 
 ---
 
 ## Key Documents (Phase 2 Roadmap)
 
 ### 1. Architecture Overview
-**File:** `00-CANONICAL/architecture-overview.md`  
+**File:** `00-architecture-overview.md`  
 **Purpose:** High-level system design, component interactions, deployment topology  
 **Contents:**
 - System diagram (iOS ↔ Fastify ↔ PostgreSQL)
@@ -111,7 +96,7 @@ docs/
 ---
 
 ### 2. Core Data Model
-**File:** `00-CANONICAL/core-data-model.md`  
+**File:** `01-data-model.md`  
 **Purpose:** Complete PostgreSQL schema specification  
 **Contents:**
 - Table definitions (`negotiations`, `participants`, `events`, etc.)
@@ -124,7 +109,7 @@ docs/
 ---
 
 ### 3. Backend APIs
-**File:** `00-CANONICAL/backend-apis.md`  
+**File:** `02-api-contracts.md`  
 **Purpose:** REST API contracts (Fastify endpoints)  
 **Contents:**
 - Endpoint definitions (`POST /negotiate/start`, etc.)
@@ -137,7 +122,7 @@ docs/
 ---
 
 ### 4. Authentication Flow
-**File:** `00-CANONICAL/authentication-flow.md`  
+**File:** See `00-architecture-overview.md` Authentication Flow section  
 **Purpose:** Firebase Auth + JWT verification design  
 **Contents:**
 - iOS login flow (Firebase SDK)
@@ -148,7 +133,7 @@ docs/
 ---
 
 ### 5. Negotiation State Machine
-**File:** `00-CANONICAL/negotiation-state-machine.md`  
+**File:** See `01-data-model.md` and `02-api-contracts.md`  
 **Purpose:** Negotiation lifecycle logic  
 **Contents:**
 - State transitions (pending → confirmed → event)
@@ -159,7 +144,7 @@ docs/
 ---
 
 ### 6. E2EE Specification
-**File:** `00-CANONICAL/e2ee-specification.md`  
+**File:** See `00-architecture-overview.md` Privacy Model section  
 **Purpose:** End-to-end encryption design  
 **Contents:**
 - Encryption algorithms (AES-256-GCM)
@@ -206,7 +191,7 @@ docs/
 ### Phase 2 Writing Guidelines
 
 **1. Use Canonical Specs:**
-- Start from `/docs/00-CANONICAL/` templates (TBD)
+- Reference existing specifications in `/docs/`
 - Reference existing decisions in `/tracking/TRACKING.md`
 - Cite technology choices (e.g., "Why Fastify?")
 
@@ -220,7 +205,7 @@ docs/
 - ✅ "Fastify backend verifies Firebase JWT tokens using Firebase Admin SDK v12" (specific)
 
 **4. Link Liberally:**
-- Reference other docs: `See [Core Data Model](00-CANONICAL/core-data-model.md)`
+- Reference other docs: `See [Core Data Model](01-data-model.md)`
 - Reference tracking: `Task P2.S3.T1 in /tracking/TRACKING.md`
 - Reference code (Phase 3+): `Implemented in backend/src/routes/negotiate.ts`
 
@@ -256,7 +241,7 @@ docs/
 3. **Prepare for Phase 2:**
    - Wait for P1 completion
    - Review MASTER-PLAN.md (root repo) for Phase 2 requirements
-   - Draft document outlines in `/docs/00-CANONICAL/` (when Phase 2 starts)
+   - Review existing canonical documents in `/docs/`
 
 ---
 

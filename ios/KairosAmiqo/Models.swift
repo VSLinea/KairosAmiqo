@@ -481,7 +481,7 @@ struct DirectusAPIError: Codable {
 // MARK: - Places/POI Models (Phase 5)
 
 /// Point of Interest - matches backend /items/poi schema
-/// See: /docs/00-CANONICAL/core-data-model.md §poi
+/// See: /docs/01-data-model.md
 struct POI: Codable, Identifiable, Hashable {
     let id: UUID // Consistent with VenueInfo and backend schema
     let name: String
@@ -573,7 +573,7 @@ struct POI: Codable, Identifiable, Hashable {
 }
 
 /// Learned place - auto-detected frequent locations
-/// See: /docs/00-CANONICAL/core-data-model.md (future schema)
+/// See: /docs/01-data-model.md
 /// Currently mock data only (Phase 5)
 struct LearnedPlace: Identifiable, Hashable, Codable {
     let id: UUID // Consistent UUID usage

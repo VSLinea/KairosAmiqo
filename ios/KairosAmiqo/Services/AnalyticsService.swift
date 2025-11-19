@@ -15,7 +15,7 @@ class AnalyticsService {
     private let flushInterval: TimeInterval = 60 // 1 minute
     
     private init() {
-        self.httpClient = HTTPClient(base: Config.directusBase)
+        self.httpClient = HTTPClient(base: Config.backendBase)
         self.sessionID = HashingService.generateSessionID()
     }
     
@@ -63,8 +63,7 @@ class AnalyticsService {
         do {
             let payload = batch.map { $0.toDictionary() }
             
-            // POST to Directus /items/analytics_events
-            // Note: Mini-Task 30.3 will change this to /analytics/log custom endpoint
+            // POST to backend /analytics/log endpoint
             let jsonObject: Any
             if payload.count == 1 {
                 jsonObject = payload[0]

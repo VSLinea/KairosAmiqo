@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Reusable profile button for toolbar navigation.
 /// Presents ProfileView sheet when tapped.
-/// See /docs/00-CANONICAL/ios-amiqo.md §Design System - KairosAuth components
+/// See /docs/00-architecture-overview.md for design system
 struct ProfileButton: ToolbarContent {
     @ObservedObject var vm: AppVM
     @Binding var isPresented: Bool

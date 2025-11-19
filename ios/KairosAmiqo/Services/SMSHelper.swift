@@ -3,7 +3,7 @@ import MessageUI
 
 /// Helper for sending SMS invites to participants without the Kairos app.
 /// Uses native iOS MFMessageComposeViewController for SMS with pre-filled content.
-/// See /docs/00-CANONICAL/ios-amiqo.md §Invite Routing
+/// See /docs/02-terminology.md for invitation terminology
 struct SMSHelper {
     
     /// Check if device can send SMS

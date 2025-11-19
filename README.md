@@ -100,8 +100,8 @@ cat tracking/TRACKING.md
 ```
 
 **2. Understand the Architecture:**
-- Read `/docs/` (once Phase 2 completes)
-- Review API contracts in `/docs/00-CANONICAL/` (future)
+- Read `/docs/` for canonical architecture specifications
+- Review API contracts in `/docs/02-api-contracts.md`
 
 **3. Set Up Local Environment:**
 

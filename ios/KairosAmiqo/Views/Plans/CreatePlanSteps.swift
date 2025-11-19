@@ -770,7 +770,7 @@ struct VenuesStep: View {
     //   - Venue IDs will be real POI database UUIDs (from /items/poi collection)
     //   - These UUIDs are shared references: Alice's app, Bob's web app, and backend FSM all use same POI IDs
     //   - Backend can look up venue details: GET /items/poi/{uuid}
-    //   - See: /docs/00-CANONICAL/core-data-model.md §POI collection
+    //   - See: /docs/01-data-model.md for POI structure
     private static let mockVenues: [VenueInfo] = [
         VenueInfo(id: UUID(uuidString: "880e8400-e29b-41d4-a716-446655440001")!, name: "Philz Coffee", lat: 37.7749, lon: -122.4194, address: "201 Berry St", category: "cafe", price_band: 2),
         VenueInfo(id: UUID(uuidString: "880e8400-e29b-41d4-a716-446655440002")!, name: "Blue Bottle Coffee", lat: 37.7858, lon: -122.4064, address: "66 Mint St", category: "cafe", price_band: 3),

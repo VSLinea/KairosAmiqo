@@ -14,7 +14,7 @@ import Foundation
 // MARK: - Agent Preferences (Top-Level Model)
 
 /// Complete agent preferences for a user
-/// Stored encrypted in Directus: /items/user_agent_preferences
+/// Stored encrypted on backend (E2EE)
 /// Server cannot read plaintext (E2EE with user's master key)
 struct AgentPreferences: Codable, Identifiable {
     let id: UUID
@@ -235,7 +235,7 @@ enum VetoRuleType: String, Codable {
 // MARK: - Agent Message (Peer-to-Peer Communication)
 
 /// E2EE message sent between user agents during negotiation
-/// Stored encrypted in Directus: /items/agent_messages
+/// Stored encrypted on backend
 /// Only participant agents can decrypt (Diffie-Hellman shared secret)
 struct AgentMessage: Codable, Identifiable {
     let id: UUID

@@ -185,7 +185,7 @@ All endpoints require `Authorization: Bearer <firebase_jwt_token>` header.
 - `venue_id` (TEXT)
 - `created_at`, `updated_at` (TIMESTAMP)
 
-See `/docs/00-CANONICAL/core-data-model.md` (Phase 2) for complete schema.
+See `/docs/01-data-model.md` and `/docs/04-database-schema.md` for complete schema.
 
 ---
 
@@ -306,8 +306,9 @@ LOG_LEVEL=info
 ## Where to Look Next
 
 1. **Documentation Phase (P2):**
-   - `/docs/00-CANONICAL/backend-apis.md` — Full API specification
-   - `/docs/00-CANONICAL/core-data-model.md` — Database schema
+   - `/docs/02-api-contracts.md` — Full API specification
+   - `/docs/01-data-model.md` — Data model
+   - `/docs/04-database-schema.md` — Database schema
    - `/docs/01-REFERENCE/03-architecture-overview.md` — System design
 
 2. **Implementation Phase (P3):**

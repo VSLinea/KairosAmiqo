@@ -65,11 +65,11 @@ final class AutoAcceptScenarioTest: XCTestCase {
         )
         
         // WHEN: Agent evaluates (WITHOUT AI service - heuristic only)
-        let directusClient = HTTPClient(base: Config.directusBase)
+        let backendClient = HTTPClient(base: Config.backendBase)
         let userAgent = UserAgentManager(
             userId: UUID(),
             preferences: preferences,
-            directusClient: directusClient,
+            backendClient: backendClient,
             openAIKey: nil // Force heuristic mode
         )
         

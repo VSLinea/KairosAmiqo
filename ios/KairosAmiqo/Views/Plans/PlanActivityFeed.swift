@@ -74,7 +74,7 @@ struct PlanActivityFeed: View {
                 .foregroundColor(KairosAuth.Color.secondaryText)
             
             // TODO(Kairos): Add responded_at timestamp when backend provides it
-            // See /docs/00-CANONICAL/core-data-model.md §Participants
+            // See /docs/01-data-model.md for participant structure
         }
         .accessibilityElement(children: .combine)
     }

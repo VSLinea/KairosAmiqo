@@ -5,11 +5,10 @@ Backend Adapter for RACAG
 This provides a clean API-facing interface around the RACAG engine.
 It is designed to be consumed by:
 
+- Fastify backend
 - FastAPI / Flask backends
 - GCP Cloud Run services
-- Directus custom endpoints
-- Node-RED workflows
-- Mobile clients (iOS/Android)
+- Mobile clients (iOS/Android future)
 - Local testing scripts
 
 This adapter wraps RACAG output into stable JSON that external systems
