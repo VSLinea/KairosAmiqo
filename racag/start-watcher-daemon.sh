@@ -31,8 +31,12 @@ echo "Starting RACAG watcher..."
 echo "Logs: $LOG_FILE"
 
 nohup bash -c "
-    source racag_env/bin/activate
-    export OPENAI_API_KEY=\$(cat .copilot/.secrets)
+    cd '$REPO_ROOT'
+    source racag/venv/bin/activate
+    export PYTHONPATH='$REPO_ROOT:\$PYTHONPATH'
+    if [ -f '.copilot/.secrets' ]; then
+        export OPENAI_API_KEY=\$(cat .copilot/.secrets)
+    fi
     python3 -m racag.watcher.racag_watcher
 " >> "$LOG_FILE" 2>> "$ERR_FILE" &
 

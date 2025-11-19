@@ -26,3 +26,12 @@ matplotlib>=3.7.0
 
 # Telemetry & Tracing
 opentelemetry-api>=1.20.0
+
+# Machine Learning & Embeddings
+sentence-transformers>=5.0.0
+
+# Data Processing
+numpy>=1.23.0
+
+# CLI Formatting
+rich>=13.0.0

@@ -1,0 +1,51 @@
+# RACAG Configuration
+# Settings for file watching, chunking, and embedding
+
+# Watched Paths
+# Directories and files to monitor for changes
+watched_paths:
+  - "docs/**"
+  - "backend/**"
+  - "ios/**"
+  - "README.md"
+
+# Chunkers
+# Enable/disable specific chunkers
+chunkers:
+  swift:
+    enabled: true
+    extensions: [".swift"]
+  markdown:
+    enabled: true
+    extensions: [".md"]
+  json:
+    enabled: true
+    extensions: [".json"]
+  python:
+    enabled: true
+    extensions: [".py"]
+  typescript:
+    enabled: true
+    extensions: [".ts", ".js"]
+
+# Embedding Configuration
+embedding:
+  model: "text-embedding-3-small"
+  batch_size: 100
+  dimension: 1536
+
+# ChromaDB Configuration
+chromadb:
+  path: "racag/db/chroma_store"
+  collection: "kairos_chunks"
+
+# Output Directories
+output:
+  chunks: "racag/output/chunks.jsonl"
+  embeddings: "racag/logs/embeddings.jsonl"
+  prompts: "racag/logs/prompts"
+
+# Logging
+logging:
+  level: "INFO"
+  directory: "racag/logs"
