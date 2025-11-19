@@ -2,7 +2,7 @@
 #
 # RACAG Full Reindex Script
 # ==========================
-# Rechunks + reembeds the entire KairosMain codebase
+# Rechunks + reembeds the entire KairosAmiqo codebase
 # Use this after major documentation reorganization or file moves
 #
 # Usage:
@@ -17,20 +17,25 @@ REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 
 cd "$REPO_ROOT"
 
-# Activate virtual environment if it exists
-if [ -d "racag_env" ]; then
-    echo "🐍 Activating racag_env..."
-    source racag_env/bin/activate
-fi
-
-# Load OpenAI API key from .copilot/.secrets
-if [ -f ".copilot/.secrets" ]; then
-    export OPENAI_API_KEY=$(cat .copilot/.secrets)
-    echo "🔑 OpenAI API key loaded"
+# Activate virtual environment
+if [ -d "racag/venv" ]; then
+    echo "🐍 Activating racag/venv..."
+    source racag/venv/bin/activate
 else
-    echo "❌ Error: .copilot/.secrets not found!"
+    echo "❌ Error: racag/venv not found!"
     exit 1
 fi
+
+# Load environment variables from .env
+if [ -f ".env" ]; then
+    export $(cat .env | xargs)
+    echo "🔑 Environment loaded from .env"
+else
+    echo "⚠️  Warning: .env not found, proceeding without API key"
+fi
+
+# Set PYTHONPATH
+export PYTHONPATH="$REPO_ROOT:$PYTHONPATH"
 
 echo "🔄 RACAG Full Reindex Pipeline"
 echo "================================"

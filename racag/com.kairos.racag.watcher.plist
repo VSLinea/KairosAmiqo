@@ -11,12 +11,12 @@
     <array>
         <string>/bin/bash</string>
         <string>-c</string>
-        <string>cd /Users/lyra/KairosMain &amp;&amp; source racag_env/bin/activate &amp;&amp; export OPENAI_API_KEY=$(cat .copilot/.secrets) &amp;&amp; python3 -m racag.watcher.racag_watcher</string>
+        <string>cd /Users/lyra/KairosMain/KairosAmiqo &amp;&amp; source racag/venv/bin/activate &amp;&amp; export $(cat .env | xargs) &amp;&amp; export PYTHONPATH=/Users/lyra/KairosMain/KairosAmiqo &amp;&amp; python3 -m racag.watcher.racag_watcher</string>
     </array>
     
     <!-- Working directory -->
     <key>WorkingDirectory</key>
-    <string>/Users/lyra/KairosMain</string>
+    <string>/Users/lyra/KairosMain/KairosAmiqo</string>
     
     <!-- Auto-start on boot -->
     <key>RunAtLoad</key>
@@ -37,10 +37,10 @@
     
     <!-- Logging -->
     <key>StandardOutPath</key>
-    <string>/Users/lyra/KairosMain/racag/logs/watcher.out.log</string>
+    <string>/Users/lyra/KairosMain/KairosAmiqo/racag/logs/watcher.out.log</string>
     
     <key>StandardErrorPath</key>
-    <string>/Users/lyra/KairosMain/racag/logs/watcher.err.log</string>
+    <string>/Users/lyra/KairosMain/KairosAmiqo/racag/logs/watcher.err.log</string>
     
     <!-- Environment variables -->
     <key>EnvironmentVariables</key>

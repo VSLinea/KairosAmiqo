@@ -7,7 +7,14 @@ watched_paths:
   - "docs/**"
   - "backend/**"
   - "ios/**"
+  - "racag/**"
+  - "tracking/**"
+  - "scripts/**"
   - "README.md"
+  - "./"
+
+# Recursive watching
+recursive: true
 
 # Chunkers
 # Enable/disable specific chunkers

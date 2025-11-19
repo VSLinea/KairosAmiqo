@@ -32,13 +32,16 @@ ALLOWED_EXTENSIONS = {".md", ".swift", ".kt", ".py", ".js", ".ts", ".json", ".ya
 # Get repo root
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
-# Directories to monitor
+# Directories to monitor (all relevant project paths)
 WATCH_DIRECTORIES = [
     REPO_ROOT / "docs",
-    REPO_ROOT / "ios" / "KairosAmiqo",
-    REPO_ROOT / "android",
-    REPO_ROOT / ".github",
+    REPO_ROOT / "ios",
+    REPO_ROOT / "backend",
+    REPO_ROOT / "racag",
+    REPO_ROOT / "tracking",
+    REPO_ROOT / "scripts",
     REPO_ROOT / "infra",
+    REPO_ROOT,  # Watch root for README.md and other top-level files
 ]
 
 

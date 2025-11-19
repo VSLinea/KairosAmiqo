@@ -44,7 +44,7 @@ def build_metadata(chunk: Dict[str, Any]) -> Dict[str, Any]:
 
 def _extract_embedding_dim(sample: Dict[str, Any]) -> int:
     embeddings = sample.get("embeddings")
-    if not embeddings:
+    if embeddings is None or (isinstance(embeddings, (list, tuple)) and len(embeddings) == 0):
         return 0
 
     first = embeddings[0]

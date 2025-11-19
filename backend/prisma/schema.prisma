@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AppUser {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  firebaseUid String @unique @map("firebase_uid")
+  email     String   @unique
+  displayName String? @map("display_name")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  negotiations Negotiation[]
+
+  @@map("app_users")
+}
+
+model Negotiation {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  owner     String   @db.Uuid
+  state     String   
+  intentCategory String @map("intent_category")
+  
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
+  
+  proposedSlotsJson  Json @default("[]") @map("proposed_slots_json")
+  proposedVenuesJson Json @default("[]") @map("proposed_venues_json")
+  
+  agentMode  Boolean @default(false) @map("agent_mode")
+  agentRound Int?    @default(0) @map("agent_round")
+
+  ownerUser    AppUser          @relation(fields: [owner], references: [id], onDelete: Cascade)
+  participants Participant[]
+  proposedSlots ProposedSlot[]
+  proposedVenues ProposedVenue[]
+  events       Event[]
+
+  @@index([owner])
+  @@index([state, expiresAt], map: "idx_negotiations_state_expires")
+  @@index([expiresAt], map: "idx_negotiations_active")
+  @@map("negotiations")
+}
+
+model Participant {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  negotiationId String   @map("negotiation_id") @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  status        String   
+  displayName   String?  @map("display_name")
+  
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  negotiation Negotiation @relation(fields: [negotiationId], references: [id], onDelete: Cascade)
+
+  @@unique([negotiationId, userId], map: "uq_participants_negotiation_user")
+  @@index([negotiationId])
+  @@index([userId])
+  @@index([userId, status])
+  @@map("participants")
+}
+
+model ProposedSlot {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  negotiationId   String   @map("negotiation_id") @db.Uuid
+  slotIndex       Int      @map("slot_index")
+  startsAt        DateTime @map("starts_at") @db.Timestamptz(6)
+  durationMinutes Int?     @map("duration_minutes")
+  
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  negotiation Negotiation @relation(fields: [negotiationId], references: [id], onDelete: Cascade)
+
+  @@unique([negotiationId, slotIndex], map: "uq_slots_negotiation_index")
+  @@index([negotiationId])
+  @@index([startsAt])
+  @@map("proposed_slots")
+}
+
+model ProposedVenue {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  negotiationId String   @map("negotiation_id") @db.Uuid
+  venueIndex    Int      @map("venue_index")
+  venueName     String   @map("venue_name")
+  venueMetadata Json?    @map("venue_metadata")
+  
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  negotiation Negotiation @relation(fields: [negotiationId], references: [id], onDelete: Cascade)
+
+  @@unique([negotiationId, venueIndex], map: "uq_venues_negotiation_index")
+  @@index([negotiationId])
+  @@map("proposed_venues")
+}
+
+model Event {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  owner         String   @db.Uuid
+  negotiationId String?  @map("negotiation_id") @db.Uuid
+  title         String
+  startsAt      DateTime @map("starts_at") @db.Timestamptz(6)
+  endsAt        DateTime? @map("ends_at") @db.Timestamptz(6)
+  status        String   
+  metadata      Json?    
+  
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  negotiation Negotiation? @relation(fields: [negotiationId], references: [id], onDelete: SetNull)
+
+  @@index([owner])
+  @@index([startsAt])
+  @@index([status, startsAt])
+  @@map("events")
+}
