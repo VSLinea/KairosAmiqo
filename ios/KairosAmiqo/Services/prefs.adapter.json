@@ -1,0 +1,20 @@
+{
+  "schema_ref": "entities.prefs",
+  "description": "Adapter for user preference and privacy model bindings.",
+  "api_endpoints": {
+    "list": "GET /items/prefs",
+    "update": "PATCH /items/prefs/:id"
+  },
+  "pii_flags": ["privacy", "time_blocks"],
+  "llm_binding": {
+    "input_keys": ["budget_tier", "radius_km", "tags"],
+    "output_keys": ["privacy", "time_blocks"]
+  },
+  "sample_payload": {
+    "id": "uuid",
+    "budget_tier": 2,
+    "radius_km": 5,
+    "privacy": {"share_location": false},
+    "tags": ["cafe", "outdoors"]
+  }
+}

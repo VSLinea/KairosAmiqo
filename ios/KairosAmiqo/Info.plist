@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.kairos.amiqo</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>kairos</string>
+			</array>
+		</dict>
+	</array>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>83.250.24.174</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Kairos needs local network access to connect to your development server for testing.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_http._tcp</string>
+		<string>_https._tcp</string>
+	</array>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Kairos needs full calendar access to add confirmed events and provide the best experience for managing your scheduled meetups.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Kairos syncs your contacts to help you find friends who are already using the app and make it easier to plan together.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Kairos uses your location to show nearby places for meeting up with friends.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Amiqo needs microphone access for voice-activated planning. Speak your plans naturally and Amiqo will help coordinate.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Amiqo uses speech recognition to understand your planning requests. All processing happens on your device for privacy.</string>
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:kairos.app</string>
+		<string>applinks:www.kairos.app</string>
+	</array>
+</dict>
+</plist>

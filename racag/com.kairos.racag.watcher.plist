@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Service identification -->
+    <key>Label</key>
+    <string>com.kairos.racag.watcher</string>
+    
+    <!-- Program to run -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-c</string>
+        <string>cd /Users/lyra/KairosMain &amp;&amp; source racag_env/bin/activate &amp;&amp; export OPENAI_API_KEY=$(cat .copilot/.secrets) &amp;&amp; python3 -m racag.watcher.racag_watcher</string>
+    </array>
+    
+    <!-- Working directory -->
+    <key>WorkingDirectory</key>
+    <string>/Users/lyra/KairosMain</string>
+    
+    <!-- Auto-start on boot -->
+    <key>RunAtLoad</key>
+    <true/>
+    
+    <!-- Keep alive (restart if crashes) -->
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+        <key>Crashed</key>
+        <true/>
+    </dict>
+    
+    <!-- Restart throttle (wait 60s between restarts) -->
+    <key>ThrottleInterval</key>
+    <integer>60</integer>
+    
+    <!-- Logging -->
+    <key>StandardOutPath</key>
+    <string>/Users/lyra/KairosMain/racag/logs/watcher.out.log</string>
+    
+    <key>StandardErrorPath</key>
+    <string>/Users/lyra/KairosMain/racag/logs/watcher.err.log</string>
+    
+    <!-- Environment variables -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin</string>
+    </dict>
+    
+    <!-- Process type -->
+    <key>ProcessType</key>
+    <string>Background</string>
+    
+    <!-- Nice level (lower priority to not interfere with user tasks) -->
+    <key>Nice</key>
+    <integer>5</integer>
+</dict>
+</plist>

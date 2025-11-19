@@ -1,0 +1,82 @@
+//
+//  GoogleSignInCoordinator.swift
+//  KairosAmiqo
+//
+//  Coordinator for handling Google Sign-In authorization flow
+//  Bridges GIDSignIn delegate with async/await pattern
+//  Parallel to AppleSignInCoordinator
+//
+//  NOTE: This file requires GoogleSignIn SDK to be added via SPM first.
+//  To enable: Add https://github.com/google/GoogleSignIn-iOS to Package Dependencies
+
+#if canImport(GoogleSignIn)
+import Foundation
+import GoogleSignIn
+import UIKit
+
+/// Coordinator that handles Google Sign-In authorization flow
+/// Provides async/await interface to GIDSignIn callbacks
+class GoogleSignInCoordinator: NSObject {
+    
+    private var continuation: CheckedContinuation<GIDGoogleUser, Error>?
+    
+    /// Initiates Google Sign-In flow
+    /// - Returns: GIDGoogleUser containing user profile and authentication tokens
+    /// - Throws: Error if sign-in fails or user cancels
+    func signIn() async throws -> GIDGoogleUser {
+        // Get the presenting view controller
+        guard let presentingViewController = await getRootViewController() else {
+            throw NSError(
+                domain: "GoogleSignIn",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "No presenting view controller available"]
+            )
+        }
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            self.continuation = continuation
+            
+            // Perform sign-in
+            GIDSignIn.sharedInstance.signIn(withPresenting: presentingViewController) { [weak self] signInResult, error in
+                if let error = error {
+                    self?.continuation?.resume(throwing: error)
+                    self?.continuation = nil
+                    return
+                }
+                
+                guard let user = signInResult?.user else {
+                    let error = NSError(
+                        domain: "GoogleSignIn",
+                        code: -2,
+                        userInfo: [NSLocalizedDescriptionKey: "No user returned from Google Sign-In"]
+                    )
+                    self?.continuation?.resume(throwing: error)
+                    self?.continuation = nil
+                    return
+                }
+                
+                self?.continuation?.resume(returning: user)
+                self?.continuation = nil
+            }
+        }
+    }
+    
+    /// Gets the root view controller for presenting the sign-in sheet
+    @MainActor
+    private func getRootViewController() -> UIViewController? {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first(where: { $0.isKeyWindow }),
+              let rootViewController = window.rootViewController else {
+            return nil
+        }
+        
+        // If there's a presented view controller, use that
+        var topController = rootViewController
+        while let presented = topController.presentedViewController {
+            topController = presented
+        }
+        
+        return topController
+    }
+}
+#endif
