@@ -1,106 +1,181 @@
 import { PrismaClient, Prisma } from '@prisma/client';
 import { getPrismaClient } from '../config/database.js';
 
+export type NegotiationEntity = Prisma.NegotiationGetPayload<{
+  include: {
+    participants: true;
+    proposedSlots: { orderBy: { slotIndex: 'asc' } };
+    proposedVenues: { orderBy: { venueIndex: 'asc' } };
+  };
+}>;
+
 export class NegotiateService {
   private prisma: PrismaClient;
+  private negotiationInclude: Prisma.NegotiationInclude = {
+    participants: true,
+    proposedSlots: { orderBy: { slotIndex: 'asc' } },
+    proposedVenues: { orderBy: { venueIndex: 'asc' } },
+  };
 
   constructor() {
     this.prisma = getPrismaClient();
   }
 
-  async createNegotiation(params: {
-    id: string;
-    owner: string;
-    intentCategory: string;
-    participantCount: number;
-    proposedSlots: Array<{ starts_at: string; duration_minutes?: number }>;
-    proposedVenues?: Array<{ venue_name: string; venue_metadata?: Record<string, unknown> }>;
-    expiresAt: string;
-    encryptedPayload: string;
-    agentMode: boolean;
-  }) {
-    const { id, owner, intentCategory, proposedSlots, proposedVenues, expiresAt, agentMode } = params;
+  private async ensureAppUser(firebaseUid: string, email?: string) {
+    let user = await this.prisma.appUser.findUnique({ where: { firebaseUid } });
 
-    // Check if user exists, create if needed
-    let user = await this.prisma.appUser.findUnique({ where: { firebaseUid: owner } });
-    
     if (!user) {
       user = await this.prisma.appUser.create({
         data: {
-          firebaseUid: owner,
-          email: '', // Will be updated from JWT
+          firebaseUid,
+          email: email && email.length > 0 ? email : `${firebaseUid}@placeholder.local`,
         },
       });
     }
 
-    // Create negotiation with all related records in transaction
+    return user;
+  }
+
+  async createNegotiation(params: {
+    id: string;
+    ownerFirebaseUid: string;
+    ownerEmail?: string;
+    title?: string;
+    intentCategory: string;
+    participantIds: string[];
+    proposedSlots: Array<{ start_time: string; end_time: string }>;
+    proposedVenues?: Array<{ venue_name: string; venue_metadata?: Record<string, unknown> }>;
+    expiresAt: string;
+    agentMode: boolean;
+  }): Promise<NegotiationEntity> {
+    const {
+      id,
+      ownerFirebaseUid,
+      ownerEmail,
+      title,
+      intentCategory,
+      participantIds,
+      proposedSlots,
+      proposedVenues,
+      expiresAt,
+      agentMode,
+    } = params;
+
+    const ownerUser = await this.ensureAppUser(ownerFirebaseUid, ownerEmail);
+
+    const candidateParticipantIdentifiers = Array.from(
+      new Set(
+        participantIds
+          .map((pid) => pid.trim())
+          .filter(
+            (pid) =>
+              pid.length > 0 && pid !== ownerUser.id && pid !== ownerUser.firebaseUid
+          )
+      )
+    );
+
+    if (candidateParticipantIdentifiers.length === 0) {
+      throw new Error('PARTICIPANTS_REQUIRED');
+    }
+
+    const byIdMatches = await this.prisma.appUser.findMany({
+      where: { id: { in: candidateParticipantIdentifiers } },
+    });
+
+    const matchedIds = new Set(byIdMatches.map((user) => user.id));
+    const remainingIdentifiers = candidateParticipantIdentifiers.filter(
+      (pid) => !matchedIds.has(pid)
+    );
+
+    let byFirebaseMatches: typeof byIdMatches = [];
+    if (remainingIdentifiers.length > 0) {
+      byFirebaseMatches = await this.prisma.appUser.findMany({
+        where: { firebaseUid: { in: remainingIdentifiers } },
+      });
+    }
+
+    const referencedUsers = [...byIdMatches, ...byFirebaseMatches].reduce<typeof byIdMatches>((acc, user) => {
+      if (acc.find((existing) => existing.id === user.id)) {
+        return acc;
+      }
+      acc.push(user);
+      return acc;
+    }, []);
+
+    const resolvedIdentifiers = new Set([
+      ...referencedUsers.map((user) => user.id),
+      ...referencedUsers.map((user) => user.firebaseUid),
+    ]);
+
+    const missingIdentifiers = candidateParticipantIdentifiers.filter(
+      (pid) => !resolvedIdentifiers.has(pid)
+    );
+
+    if (missingIdentifiers.length > 0) {
+      throw new Error('PARTICIPANTS_NOT_FOUND');
+    }
+
+    const normalizedSlots = proposedSlots.map((slot, index) => {
+      const startsAt = new Date(slot.start_time);
+      const endsAt = new Date(slot.end_time);
+      const durationMinutes = Math.max(1, Math.round((endsAt.getTime() - startsAt.getTime()) / 60000));
+      return { index, startsAt, durationMinutes, snapshot: slot };
+    });
+
     return await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const negotiation = await tx.negotiation.create({
         data: {
           id,
-          owner: user!.id,
+          owner: ownerUser.id,
+          title: title?.trim() || 'Untitled negotiation',
           state: 'awaiting_invites',
           intentCategory,
           expiresAt: new Date(expiresAt),
-          proposedSlotsJson: proposedSlots,
-          proposedVenuesJson: proposedVenues || [],
+          proposedSlotsJson: normalizedSlots.map((slot) => slot.snapshot),
+          proposedVenuesJson: (proposedVenues ?? []) as Prisma.InputJsonValue,
           agentMode,
           agentRound: 0,
-        },
-      });
-
-      // Create organizer participant
-      await tx.participant.create({
-        data: {
-          negotiationId: negotiation.id,
-          userId: user!.id,
-          status: 'organizer',
-        },
-      });
-
-      // Create proposed slots
-      for (let i = 0; i < proposedSlots.length; i++) {
-        const slot = proposedSlots[i];
-        await tx.proposedSlot.create({
-          data: {
-            negotiationId: negotiation.id,
-            slotIndex: i,
-            startsAt: new Date(slot.starts_at),
-            durationMinutes: slot.duration_minutes,
+          participants: {
+            create: [
+              {
+                userId: ownerUser.id,
+                status: 'organizer',
+              },
+              ...referencedUsers.map((user) => ({
+                userId: user.id,
+                status: 'invited',
+              })),
+            ],
           },
-        });
-      }
-
-      // Create proposed venues if present
-      if (proposedVenues) {
-        for (let i = 0; i < proposedVenues.length; i++) {
-          const venue = proposedVenues[i];
-          await tx.proposedVenue.create({
-            data: {
-              negotiationId: negotiation.id,
-              venueIndex: i,
+          proposedSlots: {
+            create: normalizedSlots.map((slot) => ({
+              slotIndex: slot.index,
+              startsAt: slot.startsAt,
+              durationMinutes: slot.durationMinutes,
+            })),
+          },
+          proposedVenues: {
+            create: (proposedVenues ?? []).map((venue, index) => ({
+              venueIndex: index,
               venueName: venue.venue_name,
-              venueMetadata: venue.venue_metadata,
-            },
-          });
-        }
-      }
+              venueMetadata: (venue.venue_metadata ?? null) as Prisma.InputJsonValue,
+            })),
+          },
+        },
+        include: this.negotiationInclude,
+      });
 
       return negotiation;
     });
   }
 
-  async getNegotiationById(negotiationId: string, userId: string) {
+  async getNegotiationById(negotiationId: string, userId: string): Promise<NegotiationEntity | null> {
     const user = await this.prisma.appUser.findUnique({ where: { firebaseUid: userId } });
     if (!user) return null;
 
     const negotiation = await this.prisma.negotiation.findUnique({
       where: { id: negotiationId },
-      include: {
-        participants: true,
-        proposedSlots: { orderBy: { slotIndex: 'asc' } },
-        proposedVenues: { orderBy: { venueIndex: 'asc' } },
-      },
+      include: this.negotiationInclude,
     });
 
     if (!negotiation) return null;
@@ -123,14 +198,18 @@ export class NegotiateService {
     state?: string;
     updatedAfter?: string;
     updatedBefore?: string;
-  }) {
+  }): Promise<{ negotiations: NegotiationEntity[]; hasMore: boolean }> {
     const { userId, limit, state, updatedAfter, updatedBefore } = params;
 
     const user = await this.prisma.appUser.findUnique({ where: { firebaseUid: userId } });
     if (!user) return { negotiations: [], hasMore: false };
 
-    const where: Record<string, unknown> = {
-      owner: user.id,
+    const where: Prisma.NegotiationWhereInput = {
+      participants: {
+        some: {
+          userId: user.id,
+        },
+      },
     };
 
     if (state) {
@@ -151,11 +230,7 @@ export class NegotiateService {
       where,
       orderBy: { updatedAt: 'desc' },
       take: limit + 1,
-      include: {
-        participants: true,
-        proposedSlots: { orderBy: { slotIndex: 'asc' } },
-        proposedVenues: { orderBy: { venueIndex: 'asc' } },
-      },
+      include: this.negotiationInclude,
     });
 
     const hasMore = negotiations.length > limit;
@@ -172,7 +247,7 @@ export class NegotiateService {
     counterPayload?: string;
     selectedSlotIndex?: number;
     selectedVenueIndex?: number;
-  }) {
+  }): Promise<NegotiationEntity | null> {
     const { negotiationId, userId, action } = params;
 
     const user = await this.prisma.appUser.findUnique({ where: { firebaseUid: userId } });
@@ -195,8 +270,9 @@ export class NegotiateService {
         throw new Error(`Cannot reply to ${negotiation.state} negotiation`);
       }
 
-      // Update participant status
-      const newStatus = action === 'accept' ? 'accepted' : action === 'reject' ? 'rejected' : 'countered';
+      // Update participant status (canonical Phase 3.5)
+      // Note: 'counter' action keeps status as 'invited' - countering is a negotiation-level action, not a participant status
+      const newStatus = action === 'accept' ? 'accepted' : action === 'reject' ? 'declined' : 'invited';
       await tx.participant.update({
         where: { id: participant.id },
         data: { status: newStatus },
@@ -221,7 +297,7 @@ export class NegotiateService {
       }
 
       // Update negotiation
-      const updated = await tx.negotiation.update({
+      await tx.negotiation.update({
         where: { id: negotiationId },
         data: {
           state: newState,
@@ -230,7 +306,10 @@ export class NegotiateService {
         },
       });
 
-      return updated;
+      return await tx.negotiation.findUnique({
+        where: { id: negotiationId },
+        include: this.negotiationInclude,
+      });
     });
   }
 }

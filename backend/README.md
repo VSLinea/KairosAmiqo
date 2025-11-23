@@ -1,9 +1,10 @@
 # Kairos Backend (Fastify)
 
-**Status:** 🚧 Not yet implemented (awaiting Phase 3)  
+**Status:** ✅ Phase 3 Complete - Operational  
 **Framework:** Fastify (Node.js + TypeScript)  
 **Database:** PostgreSQL 16  
-**Authentication:** Firebase Auth (JWT verification)
+**Authentication:** Firebase Auth (JWT verification)  
+**Server:** Running on http://localhost:3000
 
 ---
 
@@ -131,7 +132,7 @@ All endpoints require `Authorization: Bearer <firebase_jwt_token>` header.
 ```json
 {
   "id": "uuid",
-  "status": "pending",
+  "state": "awaiting_replies",
   "initiator_id": "user_id",
   "participants": [...],
   "proposed_slots": [...],
@@ -150,7 +151,7 @@ All endpoints require `Authorization: Bearer <firebase_jwt_token>` header.
 **`negotiations`**
 - `id` (UUID, primary key)
 - `initiator_id` (TEXT, Firebase UID)
-- `status` (ENUM: pending, confirmed, cancelled, expired)
+- `state` (ENUM: awaiting_invites, awaiting_replies, confirmed, cancelled, expired)
 - `intent_type` (TEXT)
 - `round` (INTEGER, default 1)
 - `created_at`, `updated_at` (TIMESTAMP)
@@ -160,7 +161,7 @@ All endpoints require `Authorization: Bearer <firebase_jwt_token>` header.
 - `negotiation_id` (UUID, foreign key)
 - `user_id` (TEXT, Firebase UID)
 - `role` (ENUM: initiator, invitee)
-- `response_status` (ENUM: pending, accepted, declined, countered)
+- `status` (ENUM: invited, accepted, declined)
 
 **`proposed_slots`**
 - `id` (UUID, primary key)
@@ -343,6 +344,32 @@ LOG_LEVEL=info
 
 ---
 
-**Last Updated:** November 18, 2025  
-**Phase:** P1 (Repository Setup)  
-**Next Milestone:** Phase 3 (Backend Implementation - Jan 2026)
+---
+
+## API Smoke Tests (Local)
+
+To run the curl-based API smoke tests against your local backend:
+
+1. Start the dev server in one terminal:
+
+   ```bash
+   npm run dev
+   ```
+
+2. In another terminal, run the API test suite:
+
+   ```bash
+   cd backend
+   npm run api:test
+   ```
+
+This will:
+- Use the Firebase Admin service account configured in `.env` / `firebase-admin.json`.
+- Mint a test Firebase token.
+- Call `/health`, `/me`, `/negotiate/start`, `/negotiations/:id`, and `/events/upcoming` using curl.
+
+---
+
+**Last Updated:** November 19, 2025  
+**Phase:** P3 (Backend Implementation)  
+**Next Milestone:** Phase 4 (iOS Integration)

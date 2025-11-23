@@ -6,6 +6,15 @@ import { env } from './config/env.js';
 import { initializeFirebase } from './config/firebase.js';
 import { getPrismaClient, disconnectPrisma } from './config/database.js';
 
+const versionEnv = env as typeof env & {
+  APP_VERSION: string;
+  SCHEMA_VERSION: string;
+  BUILD_TIMESTAMP?: string;
+  COMMIT_SHA?: string;
+  COMMIT_SHA_FULL?: string;
+  COMMIT_URL?: string;
+};
+
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
@@ -19,6 +28,7 @@ export async function buildApp(): Promise<FastifyInstance> {
       } : undefined,
     },
   });
+  const bootTimeMs = Date.now();
 
   // Initialize Firebase
   initializeFirebase();
@@ -61,14 +71,54 @@ export async function buildApp(): Promise<FastifyInstance> {
     await registerUsersRoutes(instance);
   });
 
+  await app.register(async (instance) => {
+    const { registerAuthRoutes } = await import('./routes/auth.routes.js');
+    await registerAuthRoutes(instance);
+  });
+
+  // Auth debug routes (development/staging only)
+  if (env.NODE_ENV !== 'production') {
+    await app.register(async (instance) => {
+      const authDebugRoutes = (await import('./routes/auth-debug.routes.js')).default;
+      await authDebugRoutes(instance);
+    });
+    app.log.info('Auth debug routes registered (/auth/debug, /auth/verify)');
+  }
+
   // Health check route
-  app.get('/health', async () => {
-    return { status: 'ok', timestamp: new Date().toISOString() };
+  app.get('/health', async (request) => {
+    const timestamp = new Date().toISOString();
+    return {
+      data: {
+        status: 'ok',
+        uptime_seconds: Math.floor((Date.now() - bootTimeMs) / 1000),
+        timestamp,
+      },
+      meta: {
+        request_id: request.id,
+        timestamp,
+      },
+    };
   });
 
   // Version route
-  app.get('/version', async () => {
-    return { version: '0.1.0', environment: env.NODE_ENV };
+  app.get('/version', async (request) => {
+    const timestamp = new Date().toISOString();
+    return {
+      data: {
+        backend_version: versionEnv.APP_VERSION,
+        schema_version: versionEnv.SCHEMA_VERSION,
+        environment: env.NODE_ENV,
+        build_timestamp: versionEnv.BUILD_TIMESTAMP ?? timestamp,
+        commit_sha: versionEnv.COMMIT_SHA,
+        commit_sha_full: versionEnv.COMMIT_SHA_FULL,
+        commit_url: versionEnv.COMMIT_URL,
+      },
+      meta: {
+        request_id: request.id,
+        timestamp,
+      },
+    };
   });
 
   // Graceful shutdown

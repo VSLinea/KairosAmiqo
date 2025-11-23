@@ -8,16 +8,27 @@ const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(3000),
   HOST: z.string().default('0.0.0.0'),
   DATABASE_URL: z.string().url(),
-  FIREBASE_PROJECT_ID: z.string().min(1),
-  FIREBASE_CLIENT_EMAIL: z.string().email(),
-  FIREBASE_PRIVATE_KEY: z.string().min(1),
+  FIREBASE_CREDENTIALS_PATH: z.string().min(1),
   ALLOWED_ORIGINS: z.string().transform((val) => val.split(',')),
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(100),
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(900000),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
+  APP_VERSION: z.string().default('0.1.0'),
+  SCHEMA_VERSION: z.string().default('negotiations-v1'),
+  BUILD_TIMESTAMP: z.string().datetime().optional(),
+  COMMIT_SHA: z.string().optional(),
+  COMMIT_SHA_FULL: z.string().optional(),
+  COMMIT_URL: z.string().url().optional(),
 });
 
-export type Env = z.infer<typeof envSchema>;
+export type Env = z.infer<typeof envSchema> & {
+  APP_VERSION: string;
+  SCHEMA_VERSION: string;
+  BUILD_TIMESTAMP?: string;
+  COMMIT_SHA?: string;
+  COMMIT_SHA_FULL?: string;
+  COMMIT_URL?: string;
+};
 
 function validateEnv(): Env {
   const parsed = envSchema.safeParse(process.env);

@@ -1,28 +1,73 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
+import type { Event as EventModel } from '@prisma/client';
 import { EventsService } from '../services/events.service.js';
-import { ListEventsQuery, ListEventsQuerySchema } from '../schemas/api.schemas.js';
+import {
+  ListEventsQuery,
+  ListEventsQuerySchema,
+  ListUpcomingEventsQuery,
+  ListUpcomingEventsQuerySchema,
+} from '../schemas/api.schemas.js';
 
 const eventsService = new EventsService();
 
+type JsonObject = Record<string, unknown>;
+
+function formatEventResponse(event: EventModel) {
+  const metadataValue = (event.metadata ?? null) as unknown;
+  const hasObjectMetadata =
+    metadataValue !== null && typeof metadataValue === 'object' && !Array.isArray(metadataValue);
+  const venueMetadata = hasObjectMetadata ? (metadataValue as JsonObject) : null;
+  const venueName =
+    venueMetadata && typeof venueMetadata['venue_name'] === 'string'
+      ? (venueMetadata['venue_name'] as string)
+      : null;
+
+  return {
+    id: event.id,
+    owner: event.owner,
+    title: event.title,
+    starts_at: event.startsAt.toISOString(),
+    ends_at: event.endsAt?.toISOString() ?? null,
+    status: event.status,
+    negotiation_id: event.negotiationId,
+    venue_name: venueName,
+    venue_metadata: venueMetadata,
+    created_at: event.createdAt.toISOString(),
+    updated_at: event.updatedAt.toISOString(),
+  };
+}
+
 export async function listUpcomingEvents(
-  request: FastifyRequest,
+  request: FastifyRequest<{ Querystring: ListUpcomingEventsQuery }>,
   reply: FastifyReply
 ): Promise<void> {
+  const validation = ListUpcomingEventsQuerySchema.safeParse(request.query ?? {});
+  if (!validation.success) {
+    return reply.status(422).send({
+      error: {
+        code: 'validation_error',
+        message: 'Query parameter validation failed',
+        details: validation.error.format(),
+      },
+    });
+  }
+
+  const query = validation.data;
+
   try {
     const events = await eventsService.listUpcomingEvents({
       userId: request.userId,
-      limit: 50,
+      limit: query.limit,
+      after: query.after,
     });
 
     return reply.status(200).send({
-      data: events.map((e: { id: string; title: string; startsAt: Date; endsAt: Date | null; status: string; createdAt: Date }) => ({
-        id: e.id,
-        title: e.title,
-        starts_at: e.startsAt.toISOString(),
-        ends_at: e.endsAt?.toISOString(),
-        status: e.status,
-        created_at: e.createdAt.toISOString(),
-      })),
+      data: events.map(formatEventResponse),
+      meta: {
+        request_id: request.id,
+        timestamp: new Date().toISOString(),
+        count: events.length,
+      },
     });
   } catch (error) {
     request.log.error({ err: error }, 'Failed to fetch upcoming events');
@@ -63,16 +108,10 @@ export async function getEvent(
     }
 
     return reply.status(200).send({
-      data: {
-        id: event.id,
-        title: event.title,
-        starts_at: event.startsAt.toISOString(),
-        ends_at: event.endsAt?.toISOString(),
-        status: event.status,
-        negotiation_id: event.negotiationId,
-        metadata: event.metadata,
-        created_at: event.createdAt.toISOString(),
-        updated_at: event.updatedAt.toISOString(),
+      data: formatEventResponse(event),
+      meta: {
+        request_id: request.id,
+        timestamp: new Date().toISOString(),
       },
     });
   } catch (error) {
@@ -113,15 +152,7 @@ export async function listEvents(
     });
 
     return reply.status(200).send({
-      data: result.events.map((e: { id: string; title: string; startsAt: Date; endsAt: Date | null; status: string; createdAt: Date; updatedAt: Date }) => ({
-        id: e.id,
-        title: e.title,
-        starts_at: e.startsAt.toISOString(),
-        ends_at: e.endsAt?.toISOString(),
-        status: e.status,
-        created_at: e.createdAt.toISOString(),
-        updated_at: e.updatedAt.toISOString(),
-      })),
+      data: result.events.map(formatEventResponse),
       pagination: {
         has_more: result.hasMore,
         next_cursor: result.hasMore ? 'opaque-cursor-placeholder' : undefined,

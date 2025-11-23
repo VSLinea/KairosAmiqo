@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { getPrismaClient } from '../config/database.js';
 
 export class EventsService {
@@ -8,18 +8,28 @@ export class EventsService {
     this.prisma = getPrismaClient();
   }
 
-  async listUpcomingEvents(params: { userId: string; limit: number }) {
-    const { userId, limit } = params;
+  async listUpcomingEvents(params: { userId: string; limit: number; after?: string }) {
+    const { userId, limit, after } = params;
 
     const user = await this.prisma.appUser.findUnique({ where: { firebaseUid: userId } });
     if (!user) return [];
 
     const now = new Date();
+    const startsAtFilter: Prisma.DateTimeFilter = {
+      gte: now,
+    };
+
+    if (after) {
+      const afterDate = new Date(after);
+      if (!Number.isNaN(afterDate.getTime())) {
+        startsAtFilter.gt = afterDate;
+      }
+    }
 
     return await this.prisma.event.findMany({
       where: {
         owner: user.id,
-        startsAt: { gte: now },
+        startsAt: startsAtFilter,
         status: 'confirmed',
       },
       orderBy: { startsAt: 'asc' },
