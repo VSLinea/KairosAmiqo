@@ -277,6 +277,11 @@ ehthumbs.db
 secrets/
 .secrets
 
+# Firebase Admin Credentials
+firebase-admin.json
+firebase-admin.json.*
+**/firebase-admin.json*
+
 # ============================================
 # Miscellaneous
 # ============================================
